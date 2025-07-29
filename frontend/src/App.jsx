@@ -10,6 +10,7 @@ import { LogsPage } from '@/components/LogsPage'
 import { SettingsPage } from '@/components/SettingsPage'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import apiClient from '@/lib/api'
 import './App.css'
 
 function App() {
@@ -31,13 +32,21 @@ function App() {
 
   const fetchSystemStatus = async () => {
     try {
-      // In a real app, this would call the API
-      // For demo, we'll simulate the data
+      // Check API health
+      await apiClient.healthCheck()
+      
+      // Get agents data
+      const agentsResponse = await apiClient.getAgents({ limit: 100 })
+      const agents = agentsResponse.data || []
+      
       setSystemStatus({
         status: 'healthy',
-        agents: { total: 3, active: 3 },
-        tasks: { total: 156, running: 4 },
-        errors: { total: 2 }
+        agents: { 
+          total: agents.length, 
+          active: agents.filter(a => a.status === 'active').length 
+        },
+        tasks: { total: 156, running: 4 }, // Will be replaced with real data
+        errors: { total: 2 } // Will be replaced with real data
       })
     } catch (error) {
       console.error('Failed to fetch system status:', error)
